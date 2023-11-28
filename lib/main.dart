@@ -115,6 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     Text('${scale.floor()} %'),
                     IconButton(
                         onPressed: () {
+                          if (scale >= 640) return;
                           transformController.value = Matrix4.identity()
                             ..scale(scale / 10 + 0.1);
                           setState(() {

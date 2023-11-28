@@ -14,21 +14,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
@@ -48,25 +33,112 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final transformController = TransformationController();
+  final GlobalKey _interactiveViewerKey = GlobalKey();
+
+  double scale = 10;
+
+  @override
+  void initState() {
+    transformController.value = Matrix4.identity()..scale(10);
+    setState(() {
+      scale = 100;
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: InteractiveViewer(
-        minScale: 0.1,
-        maxScale: 2,
-        panEnabled: true,
-        transformationController: transformController,
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: CustomPaint(
-            painter: GridPainter(),
+      body: Stack(children: [
+        GestureDetector(
+          onDoubleTapDown: (details) {
+            final childTapped =
+                transformController.toScene(details.localPosition);
+            final newScale =
+                transformController.value.getMaxScaleOnAxis() * 2.0;
+            if (newScale > 640) return;
+
+            transformController.value = Matrix4.identity()
+              ..translate(childTapped.dx, childTapped.dy)
+              ..scale(newScale)
+              ..translate(-childTapped.dx, -childTapped.dy);
+
+            setState(() {
+              scale = newScale * 10;
+            });
+          },
+          child: InteractiveViewer(
+            key: _interactiveViewerKey,
+            maxScale: 640,
+            minScale: 0.1,
+            panEnabled: true,
+            scaleEnabled: true,
+            transformationController: transformController,
+            onInteractionUpdate: (details) {
+              final newScale = transformController.value.getMaxScaleOnAxis();
+
+              setState(() {
+                scale = newScale * 10;
+              });
+            },
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              child: CustomPaint(
+                painter: GridPainter(),
+              ),
+            ),
           ),
         ),
-      ),
+        Align(
+          alignment: Alignment.bottomLeft,
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(12),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 2,
+                        offset: const Offset(2, -1))
+                  ]),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('${scale.floor()} %'),
+                    IconButton(
+                        onPressed: () {
+                          transformController.value = Matrix4.identity()
+                            ..scale(scale / 10 + 0.1);
+                          setState(() {
+                            scale = scale + 10;
+                          });
+                        },
+                        icon: const Icon(Icons.add)),
+                    IconButton(
+                        onPressed: () {
+                          if (scale <= 10) return;
+                          transformController.value = Matrix4.identity()
+                            ..scale(scale / 10 - 0.1);
+                          setState(() {
+                            scale = scale - 10;
+                          });
+                        },
+                        icon: const Icon(Icons.remove))
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ]),
     );
   }
 }

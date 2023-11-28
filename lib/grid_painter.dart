@@ -5,8 +5,8 @@ class GridPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const columnWidth = 5.0;
-    const rowHeight = 5.0;
+    const columnWidth = 1.0;
+    const rowHeight = 1.0;
 
     final columns = size.width / columnWidth;
 
@@ -20,7 +20,7 @@ class GridPainter extends CustomPainter {
           Offset(dx, size.height),
           Paint()
             ..color = Colors.grey.withOpacity(0.3)
-            ..strokeWidth = 0.1);
+            ..strokeWidth = 0.01);
     }
 
     // Draw horizontal grid lines
@@ -31,7 +31,7 @@ class GridPainter extends CustomPainter {
           Offset(size.width, dy),
           Paint()
             ..color = Colors.grey.withOpacity(0.3)
-            ..strokeWidth = 0.1);
+            ..strokeWidth = 0.01);
     }
   }
 

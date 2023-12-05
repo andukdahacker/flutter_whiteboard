@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_whiteboard/grid_painter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_whiteboard/widget/drawable_circle.dart';
+import 'package:flutter_whiteboard/widget/grid_painter.dart';
+import 'package:flutter_whiteboard/widget/svg_painter.dart';
+import 'package:flutter_whiteboard/widget/zoomer_widget.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key,});
+  
 
   // This widget is the root of your application.
   @override
@@ -17,13 +22,13 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Flutter Demo Home Page',),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({super.key, required this.title, });
 
   final String title;
 
@@ -36,6 +41,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final GlobalKey _interactiveViewerKey = GlobalKey();
 
   double scale = 10;
+
+  List<Drawable> drawable = [];
 
   @override
   void initState() {
@@ -54,17 +61,22 @@ class _MyHomePageState extends State<MyHomePage> {
           onDoubleTapDown: (details) {
             final childTapped =
                 transformController.toScene(details.localPosition);
-            final newScale =
-                transformController.value.getMaxScaleOnAxis() * 2.0;
-            if (newScale > 640) return;
+            // final newScale =
+            //     transformController.value.getMaxScaleOnAxis() * 2.0;
+            // if (newScale > 640) return;
+            //
+            // transformController.value = Matrix4.identity()
+            //   ..translate(childTapped.dx, childTapped.dy)
+            //   ..scale(newScale)
+            //   ..translate(-childTapped.dx, -childTapped.dy);
+            //
+            // setState(() {
+            //   scale = newScale * 10;
+            // });
 
-            transformController.value = Matrix4.identity()
-              ..translate(childTapped.dx, childTapped.dy)
-              ..scale(newScale)
-              ..translate(-childTapped.dx, -childTapped.dy);
-
+            final circle = DrawableCircle(centerX: childTapped.dx, centerY: childTapped.dy, radius: 50, fill: '#b74093');
             setState(() {
-              scale = newScale * 10;
+              drawable.add(circle);
             });
           },
           child: InteractiveViewer(
@@ -85,58 +97,38 @@ class _MyHomePageState extends State<MyHomePage> {
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
               child: CustomPaint(
-                painter: GridPainter(),
+                painter: SvgPainter(drawables: drawable),
+                foregroundPainter: GridPainter(),
               ),
             ),
           ),
         ),
         Align(
           alignment: Alignment.bottomLeft,
-          child: Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(12),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 2,
-                        offset: const Offset(2, -1))
-                  ]),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('${scale.floor()} %'),
-                    IconButton(
-                        onPressed: () {
-                          if (scale >= 640) return;
-                          transformController.value = Matrix4.identity()
-                            ..scale(scale / 10 + 0.1);
-                          setState(() {
-                            scale = scale + 10;
-                          });
-                        },
-                        icon: const Icon(Icons.add)),
-                    IconButton(
-                        onPressed: () {
-                          if (scale <= 10) return;
-                          transformController.value = Matrix4.identity()
-                            ..scale(scale / 10 - 0.1);
-                          setState(() {
-                            scale = scale - 10;
-                          });
-                        },
-                        icon: const Icon(Icons.remove))
-                  ],
-                ),
-              ),
-            ),
+          child: ZoomControllerWidget(
+            onZoomIn: () {
+              final size = MediaQuery.of(context).size;
+              final center = Offset(size.height / 2, size.width / 2);
+              transformController.value = Matrix4.identity()
+                ..translate(center.dx, center.dy)
+                ..scale(scale / 10 + 0.1)
+                ..translate(-center.dx, -center.dy);
+              setState(() {
+                scale = scale + 10;
+              });
+            },
+            onZoomOut: () {
+              final size = MediaQuery.of(context).size;
+              final center = Offset(size.height / 2, size.width / 2);
+              transformController.value = Matrix4.identity()
+                ..translate(center.dx, center.dy)
+                ..scale(scale / 10 - 0.1)
+                ..translate(-center.dx, -center.dy);
+              setState(() {
+                scale = scale - 10;
+              });
+            },
+            scale: scale,
           ),
         ),
       ]),

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_whiteboard/extensions/hex_color_extension.dart';
-import 'package:flutter_whiteboard/widget/drawable_circle.dart';
 
-class SvgPainter extends CustomPainter {
-  SvgPainter({required this.drawables});
+import '../drawables/drawable.dart';
+
+class DrawablePainter extends CustomPainter {
+  DrawablePainter({required this.drawables});
   final List<Drawable> drawables;
 
   @override

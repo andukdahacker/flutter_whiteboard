@@ -1,9 +1,8 @@
-import 'dart:ui';
-import 'package:flutter_whiteboard/extensions/hex_color_extension.dart';
 
-abstract class Drawable {
-  void drawOnCanvas(Canvas canvas, Size size);
-}
+import 'package:flutter/material.dart';
+
+import '../extensions/hex_color_extension.dart';
+import 'drawable.dart';
 
 class DrawableCircle implements Drawable {
   DrawableCircle({

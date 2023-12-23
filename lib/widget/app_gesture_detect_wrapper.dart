@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_whiteboard/controllers/cursor_provider.dart';
 import 'package:flutter_whiteboard/controllers/drawable_provider.dart';
 import 'package:flutter_whiteboard/controllers/tool_provider.dart';
 import 'package:flutter_whiteboard/main.dart';
@@ -41,43 +39,6 @@ class _AppGestureDetectWrapperState extends State<AppGestureDetectWrapper> {
   void didChangeDependencies() {
     super.didChangeDependencies();
   }
-
-  // void _onMouseDownListener() {
-  //   final toolProvider = context.watch<ToolProvider>();
-  //
-  //   window.onMouseDown.listen((event) {
-  //     switch (toolProvider.tool) {
-  //       case Tool.selector:
-  //         break;
-  //       case Tool.hand:
-  //         context
-  //             .read<CursorProvider>()
-  //             .changeCursor(SystemMouseCursors.grabbing);
-  //         break;
-  //       case Tool.square:
-  //         break;
-  //       case Tool.circle:
-  //         break;
-  //     }
-  //   });
-  // }
-  //
-  // void _onMouseUpListener() {
-  //   final toolProvider = context.watch<ToolProvider>();
-  //   window.onMouseUp.listen((event) {
-  //     switch (toolProvider.tool) {
-  //       case Tool.selector:
-  //         break;
-  //       case Tool.hand:
-  //         context.read<CursorProvider>().changeCursor(SystemMouseCursors.grab);
-  //         break;
-  //       case Tool.square:
-  //         break;
-  //       case Tool.circle:
-  //         break;
-  //     }
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {

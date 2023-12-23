@@ -9,11 +9,10 @@ import 'package:flutter_whiteboard/widget/tool_selector.dart';
 import 'package:flutter_whiteboard/widget/zoomer_widget.dart';
 import 'package:provider/provider.dart';
 
-import 'drawables/drawable.dart';
 import 'widget/drawable_painter.dart';
 
 void main() async {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 enum Tool {
@@ -40,7 +39,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => ToolProvider()),
         ChangeNotifierProvider(create: (context) => CursorProvider()),
         ChangeNotifierProvider(create: (context) => ScaleProvider()),
-        ChangeNotifierProvider(create: (context) => DrawableProvider(),)
+        ChangeNotifierProvider(
+          create: (context) => DrawableProvider(),
+        )
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
@@ -49,7 +50,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: MyHomePage(
+        home: const MyHomePage(
           title: 'Flutter Demo Home Page',
         ),
       ),
@@ -71,6 +72,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final transformationController = TransformationController();
+
   @override
   void initState() {
     super.initState();
@@ -116,11 +118,44 @@ class _MyHomePageState extends State<MyHomePage> {
               child: SizedBox(
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
-                child: Consumer<DrawableProvider>(
-                  builder: (context, value, child) => CustomPaint(
-                    painter: DrawablePainter(drawables: value.drawables),
-                    foregroundPainter: GridPainter(),
-                  ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CustomPaint(
+                      painter: GridPainter(),
+                    ),
+                    Consumer<DrawableProvider>(
+                      builder: (context, value, child) {
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            ...List.generate(value.drawables.length, (index) {
+                              final drawable = value.drawables[index];
+                              final scale = context.read<ScaleProvider>().scale;
+                              return Positioned(
+                                top: drawable.dy - drawable.width / 2,
+                                left: drawable.dx - drawable.height / 2,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Colors.grey, width: 1 / scale),
+                                  ),
+                                  width: drawable.width,
+                                  height: drawable.height,
+                                ),
+                              );
+                            }),
+                            ...List.generate(value.drawables.length, (index) {
+                              final drawable = value.drawables[index];
+                              return CustomPaint(
+                                painter: DrawablePainter(drawable: drawable),
+                              );
+                            }),
+                          ],
+                        );
+                      },
+                    )
+                  ],
                 ),
               ),
             ),

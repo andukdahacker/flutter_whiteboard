@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../extensions/hex_color_extension.dart';
 import 'drawable.dart';
 
-class DrawableCircle implements Drawable {
+class DrawableCircle extends Drawable {
   DrawableCircle({
     required this.centerX,
     required this.centerY,
@@ -12,7 +12,7 @@ class DrawableCircle implements Drawable {
     required this.radius,
     this.strokeColor = 'black',
     this.strokeWidth = 1,
-  });
+  }) : super(dx: centerX, dy: centerY, width: radius * 2.0, height: radius * 2.0);
 
   final double centerX;
   final double centerY;

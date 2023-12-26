@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_whiteboard/controllers/cursor_provider.dart';
 import 'package:flutter_whiteboard/controllers/drawable_provider.dart';
 import 'package:flutter_whiteboard/controllers/scale_provider.dart';
 import 'package:flutter_whiteboard/controllers/tool_provider.dart';
 import 'package:flutter_whiteboard/widget/app_gesture_detect_wrapper.dart';
+import 'package:flutter_whiteboard/widget/drawable_widget.dart';
 import 'package:flutter_whiteboard/widget/grid_painter.dart';
 import 'package:flutter_whiteboard/widget/tool_selector.dart';
 import 'package:flutter_whiteboard/widget/zoomer_widget.dart';
 import 'package:provider/provider.dart';
 
-import 'widget/drawable_painter.dart';
 
 void main() async {
+  debugRepaintRainbowEnabled = true;
   runApp(const MyApp());
 }
 
@@ -94,14 +96,17 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Consumer<CursorProvider>(
-        builder: (context, value, child) => MouseRegion(
+        builder: (context, value, child) {
+          print('_MyHomePageState.build ${value.cursor}');
+          return MouseRegion(
           cursor: value.cursor,
           child: child,
-        ),
-        child: Stack(children: [
-          AppGestureDetectWrapper(
-            transformationController: transformationController,
-            child: Consumer<ToolProvider>(
+        );
+        },
+        child: AppGestureDetectWrapper(
+          transformationController: transformationController,
+          child: Stack(children: [
+            Consumer<ToolProvider>(
               builder: (context, value, child) => InteractiveViewer(
                 maxScale: 640.0,
                 minScale: 0.01,
@@ -128,30 +133,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       builder: (context, value, child) {
                         return Stack(
                           fit: StackFit.expand,
-                          children: [
-                            ...List.generate(value.drawables.length, (index) {
-                              final drawable = value.drawables[index];
-                              final scale = context.read<ScaleProvider>().scale;
-                              return Positioned(
-                                top: drawable.dy - drawable.width / 2,
-                                left: drawable.dx - drawable.height / 2,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Colors.grey, width: 1 / scale),
-                                  ),
-                                  width: drawable.width,
-                                  height: drawable.height,
-                                ),
-                              );
-                            }),
-                            ...List.generate(value.drawables.length, (index) {
-                              final drawable = value.drawables[index];
-                              return CustomPaint(
-                                painter: DrawablePainter(drawable: drawable),
-                              );
-                            }),
-                          ],
+                          children: List.generate(
+                              value.drawables.length,
+                              (index) => DrawableWidget(
+                                  drawable: value.drawables[index])),
                         );
                       },
                     )
@@ -159,17 +144,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             ),
-          ),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: ZoomControllerWidget(
-                transformationController: transformationController),
-          ),
-          const Align(
-            alignment: Alignment.topCenter,
-            child: ToolSelector(),
-          )
-        ]),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: ZoomControllerWidget(
+                  transformationController: transformationController),
+            ),
+            const Align(
+              alignment: Alignment.topCenter,
+              child: ToolSelector(),
+            )
+          ]),
+        ),
       ),
     );
   }

@@ -19,36 +19,31 @@ class AppGestureDetectWrapper extends StatefulWidget {
 }
 
 class _AppGestureDetectWrapperState extends State<AppGestureDetectWrapper> {
-  void _handleDoubleTapDownAsSelector(
-      TapDownDetails details, BuildContext context) {
-    final childTapped =
-        widget.transformationController.toScene(details.localPosition);
-    final newScale =
-        widget.transformationController.value.getMaxScaleOnAxis() * 2.0;
-    if (newScale > 640) return;
-
-    widget.transformationController.value = Matrix4.identity()
-      ..translate(childTapped.dx, childTapped.dy)
-      ..scale(newScale)
-      ..translate(-childTapped.dx, -childTapped.dy);
-
-    context.read<ScaleProvider>().updateScale(newScale * 10);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
+  // void _handleDoubleTapDownAsSelector(
+  //     TapDownDetails details, BuildContext context) {
+  //   final childTapped =
+  //       widget.transformationController.toScene(details.localPosition);
+  //   final newScale =
+  //       widget.transformationController.value.getMaxScaleOnAxis() * 2.0;
+  //   if (newScale > 640) return;
+  //
+  //   widget.transformationController.value = Matrix4.identity()
+  //     ..translate(childTapped.dx, childTapped.dy)
+  //     ..scale(newScale)
+  //     ..translate(-childTapped.dx, -childTapped.dy);
+  //
+  //   context.read<ScaleProvider>().updateScale(newScale * 10);
+  // }
 
   @override
   Widget build(BuildContext context) {
     final toolProvider = context.watch<ToolProvider>();
     return GestureDetector(
-      behavior: HitTestBehavior.translucent,
+      behavior: HitTestBehavior.deferToChild,
       onDoubleTapDown: (details) {
         switch (toolProvider.tool) {
           case Tool.selector:
-            _handleDoubleTapDownAsSelector(details, context);
+            // _handleDoubleTapDownAsSelector(details, context);
             break;
           case Tool.hand:
             break;
@@ -61,6 +56,7 @@ class _AppGestureDetectWrapperState extends State<AppGestureDetectWrapper> {
       onTapUp: (details) {
         switch (toolProvider.tool) {
           case Tool.selector:
+            print('_AppGestureDetectWrapperState.build');
             break;
           case Tool.hand:
             break;

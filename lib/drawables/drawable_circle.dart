@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../extensions/hex_color_extension.dart';
@@ -8,11 +7,18 @@ class DrawableCircle extends Drawable {
   DrawableCircle({
     required this.centerX,
     required this.centerY,
-    this.fill = 'white',
+    this.fill = '#b74093',
     required this.radius,
     this.strokeColor = 'black',
     this.strokeWidth = 1,
-  }) : super(dx: centerX, dy: centerY, width: radius * 2.0, height: radius * 2.0);
+    bool isSelected = false,
+  }) : super(
+            id: UniqueKey().toString(),
+            dx: centerX,
+            dy: centerY,
+            width: radius * 2.0,
+            height: radius * 2.0,
+            isSelected: isSelected);
 
   final double centerX;
   final double centerY;
@@ -28,12 +34,37 @@ class DrawableCircle extends Drawable {
   }
 
   @override
-  void drawOnCanvas(Canvas canvas, Size size) {
+  Path drawOnCanvas(Canvas canvas, Size size) {
     final paint = Paint();
     paint.color = HexColor.fromHex(fill);
     paint.strokeWidth = strokeWidth;
-    paint.style = PaintingStyle.stroke;
+    paint.style = PaintingStyle.fill;
 
-    canvas.drawCircle(Offset(centerX, centerY), radius, paint);
+    final path = Path();
+
+    path.moveTo(centerX, centerY);
+
+    path.addOval(
+      Rect.fromCircle(center: Offset(centerX, centerY), radius: radius),
+    );
+
+    canvas.drawPath(path, paint);
+
+    return path;
   }
+
+  @override
+  Drawable copyWith({
+    double? dx,
+    double? dy,
+    double? width,
+    double? height,
+    bool? isSelected,
+  }) =>
+      DrawableCircle(
+        centerX: dx ?? centerX,
+        centerY: dy ?? centerY,
+        radius: radius,
+        isSelected: isSelected ?? false,
+      );
 }

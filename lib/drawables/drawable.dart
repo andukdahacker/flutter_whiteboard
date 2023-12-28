@@ -25,7 +25,7 @@ abstract class Drawable {
     bool? isSelected,
   });
 
-  Path drawOnCanvas(Canvas canvas, Size size);
+  void drawOnCanvas(Canvas canvas, Size size);
 
   List<Offset> getCorners() {
     final double halfWidth = width / 2;

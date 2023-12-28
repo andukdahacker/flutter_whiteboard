@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_whiteboard/controllers/cursor_provider.dart';
 import 'package:flutter_whiteboard/controllers/drawable_provider.dart';
 import 'package:flutter_whiteboard/controllers/scale_provider.dart';
 import 'package:flutter_whiteboard/drawables/drawable.dart';
@@ -33,45 +32,6 @@ class DrawableWidget extends StatelessWidget {
               ),
             ),
           ),
-        GestureDetector(
-          onTap: () {
-            context.read<DrawableProvider>().selectDrawable(drawable);
-          },
-          onPanDown: (details) {
-            print('DrawableWidget.build');
-          },
-          onPanUpdate: (details) {
-            print('DrawableWidget.build update ${details.localPosition}');
-            context.read<DrawableProvider>().updateDrawable(offset: details.localPosition, drawable: drawable);
-          },
-          child: CustomPaint(
-            size: Size(drawable.width, drawable.height),
-            painter: DrawablePainter(drawable: drawable),
-          ),
-        ),
-        if (drawable.isSelected)
-          ...drawable
-              .getCorners()
-              .map(
-                (e) => Consumer<ScaleProvider>(
-                  builder: (context, value, child) => GestureDetector(
-                    onPanUpdate: (details) {
-                      context.read<DrawableProvider>().updateDrawable(size: details.primaryDelta, drawable: drawable);
-                    },
-                    child: CustomPaint(
-                      painter: DrawablePainter(
-                        drawable: DrawableCircle(
-                          centerX: e.dx,
-                          centerY: e.dy,
-                          radius: 2 / value.scale * 2,
-                          strokeWidth: 1 / value.scale,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              )
-              .toList(),
       ],
     );
   }

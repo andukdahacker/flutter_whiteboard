@@ -19,54 +19,24 @@ class AppGestureDetectWrapper extends StatefulWidget {
 }
 
 class _AppGestureDetectWrapperState extends State<AppGestureDetectWrapper> {
-  // void _handleDoubleTapDownAsSelector(
-  //     TapDownDetails details, BuildContext context) {
-  //   final childTapped =
-  //       widget.transformationController.toScene(details.localPosition);
-  //   final newScale =
-  //       widget.transformationController.value.getMaxScaleOnAxis() * 2.0;
-  //   if (newScale > 640) return;
-  //
-  //   widget.transformationController.value = Matrix4.identity()
-  //     ..translate(childTapped.dx, childTapped.dy)
-  //     ..scale(newScale)
-  //     ..translate(-childTapped.dx, -childTapped.dy);
-  //
-  //   context.read<ScaleProvider>().updateScale(newScale * 10);
-  // }
-
   @override
   Widget build(BuildContext context) {
     final toolProvider = context.watch<ToolProvider>();
     return GestureDetector(
-      behavior: HitTestBehavior.deferToChild,
-      onDoubleTapDown: (details) {
-        switch (toolProvider.tool) {
-          case Tool.selector:
-            // _handleDoubleTapDownAsSelector(details, context);
-            break;
-          case Tool.hand:
-            break;
-          case Tool.square:
-            break;
-          case Tool.circle:
-            break;
-        }
-      },
       onTapUp: (details) {
         switch (toolProvider.tool) {
           case Tool.selector:
-            print('_AppGestureDetectWrapperState.build');
+            final scale = context.read<ScaleProvider>().scale;
+            final position = widget.transformationController.toScene(details.localPosition);
+            context.read<DrawableProvider>().findDrawable(position, scale);
             break;
           case Tool.hand:
             break;
           case Tool.square:
             break;
           case Tool.circle:
-            final position =
-                widget.transformationController.toScene(details.localPosition);
-
             final scale = context.read<ScaleProvider>().scale;
+            final position = widget.transformationController.toScene(details.localPosition);
             context
                 .read<DrawableProvider>()
                 .drawCircle(position: position, scale: scale);

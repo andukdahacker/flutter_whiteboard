@@ -5,6 +5,7 @@ import 'drawable.dart';
 
 class DrawableCircle extends Drawable {
   DrawableCircle({
+    required String id,
     required this.centerX,
     required this.centerY,
     this.fill = '#b74093',
@@ -13,7 +14,7 @@ class DrawableCircle extends Drawable {
     this.strokeWidth = 1,
     bool isSelected = false,
   }) : super(
-            id: UniqueKey().toString(),
+            id: id,
             dx: centerX,
             dy: centerY,
             width: radius * 2.0,
@@ -34,7 +35,7 @@ class DrawableCircle extends Drawable {
   }
 
   @override
-  Path drawOnCanvas(Canvas canvas, Size size) {
+  void drawOnCanvas(Canvas canvas, Size size) {
     final paint = Paint();
     paint.color = HexColor.fromHex(fill);
     paint.strokeWidth = strokeWidth;
@@ -49,8 +50,6 @@ class DrawableCircle extends Drawable {
     );
 
     canvas.drawPath(path, paint);
-
-    return path;
   }
 
   @override
@@ -62,6 +61,7 @@ class DrawableCircle extends Drawable {
     bool? isSelected,
   }) =>
       DrawableCircle(
+        id: id,
         centerX: dx ?? centerX,
         centerY: dy ?? centerY,
         radius: radius,

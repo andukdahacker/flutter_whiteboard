@@ -5,12 +5,12 @@ import 'package:flutter_whiteboard/controllers/drawable_provider.dart';
 import 'package:flutter_whiteboard/controllers/scale_provider.dart';
 import 'package:flutter_whiteboard/controllers/tool_provider.dart';
 import 'package:flutter_whiteboard/widget/app_gesture_detect_wrapper.dart';
+import 'package:flutter_whiteboard/widget/drawable_painter.dart';
 import 'package:flutter_whiteboard/widget/drawable_widget.dart';
 import 'package:flutter_whiteboard/widget/grid_painter.dart';
 import 'package:flutter_whiteboard/widget/tool_selector.dart';
 import 'package:flutter_whiteboard/widget/zoomer_widget.dart';
 import 'package:provider/provider.dart';
-
 
 void main() async {
   debugRepaintRainbowEnabled = true;
@@ -97,26 +97,46 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: Consumer<CursorProvider>(
         builder: (context, value, child) {
-          print('_MyHomePageState.build ${value.cursor}');
           return MouseRegion(
-          cursor: value.cursor,
-          child: child,
-        );
+            cursor: value.cursor,
+            child: child,
+          );
         },
         child: AppGestureDetectWrapper(
           transformationController: transformationController,
-          child: Stack(children: [
+          child: Stack(fit: StackFit.expand, children: [
             Consumer<ToolProvider>(
-              builder: (context, value, child) => InteractiveViewer(
+              builder: (context, toolState, child) => InteractiveViewer(
                 maxScale: 640.0,
                 minScale: 0.01,
-                panEnabled: value.tool == Tool.hand,
+                panEnabled: toolState.tool == Tool.hand,
                 scaleEnabled: true,
                 transformationController: transformationController,
                 onInteractionUpdate: (details) {
                   final newScale =
                       transformationController.value.getMaxScaleOnAxis();
                   context.read<ScaleProvider>().updateScale(newScale);
+
+                  final toolValue = context.read<ToolProvider>().tool;
+                  final position = transformationController.toScene(details.localFocalPoint);
+                  switch (toolValue) {
+                    case Tool.selector:
+                      final selectedDrawable = context
+                          .read<DrawableProvider>()
+                          .selectedDrawable;
+                      if (selectedDrawable != null) {
+                        context.read<DrawableProvider>().updateDrawable(
+                            drawable: selectedDrawable,
+                            offset: position);
+                      }
+                      break;
+                    case Tool.hand:
+                      break;
+                    case Tool.square:
+                      break;
+                    case Tool.circle:
+                      break;
+                  }
                 },
                 child: child!,
               ),
@@ -124,21 +144,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
                 child: Stack(
-                  fit: StackFit.expand,
+                  fit: StackFit.passthrough,
                   children: [
                     CustomPaint(
                       painter: GridPainter(),
                     ),
                     Consumer<DrawableProvider>(
-                      builder: (context, value, child) {
-                        return Stack(
-                          fit: StackFit.expand,
-                          children: List.generate(
-                              value.drawables.length,
-                              (index) => DrawableWidget(
-                                  drawable: value.drawables[index])),
-                        );
-                      },
+                      builder: (context, drawableState, child) =>
+                          CustomPaint(
+                            painter: DrawablePainter(
+                              drawables: drawableState.drawables,
+                              scale: context.watch<ScaleProvider>().scale,
+                            ),
+                          ),
                     )
                   ],
                 ),
